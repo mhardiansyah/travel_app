@@ -45,7 +45,10 @@ final appRoute = GoRouter(routes: [
   GoRoute(
     path: '/otp_verification',
     name: Routes.otp_verification,
-    builder: (context, state) => OtpVerification(),
+    builder: (context, state) {
+      final email = state.extra as String;
+      return OtpVerification(email: email);
+    },
   ),
   GoRoute(
     path: '/new_password',

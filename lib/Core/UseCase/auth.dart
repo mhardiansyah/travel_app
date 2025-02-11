@@ -12,7 +12,7 @@ class prossesAuth {
   Future register(BuildContext context, String name, String email,
       String password, String confirmPassword) async {
     Uri urlRegister = Uri.parse("$url/auth/register/");
-    //vali
+    //validasi before debuging
     print("Nama: $name");
     print("Email: $email");
     print("Password: $password");
@@ -31,7 +31,6 @@ class prossesAuth {
     print("Response Body: ${response.body}");
 
     if (response.statusCode == 200) {
-      
       print("Masuk ke if statement");
       return showDialog(
         context: context,
@@ -45,7 +44,7 @@ class prossesAuth {
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
 
-                  context.goNamed(Routes.otp_verification);
+                  context.goNamed(Routes.otp_verification, extra: email);
                 },
               ),
             ],
@@ -56,6 +55,28 @@ class prossesAuth {
       print("gagal");
       print(response.body);
       return false;
+    }
+  }
+
+  Future verify(BuildContext context, String email, String otp) async {
+    Uri urlVerification = Uri.parse("$url/auth/verify/");
+    var response = await http.post(urlVerification,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email, 'otp': otp}));
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+    if (response.statusCode == 200) {
+      print("masuk ke if");
+      return context.goNamed(Routes.notif_success);
+    } else {
+      print("gagal");
+      return ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("kode otp nya salah"),
+        ),
+      );
     }
   }
 }

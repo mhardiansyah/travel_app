@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/auth.dart';
 
 class OtpVerification extends StatefulWidget {
-  const OtpVerification({super.key});
+  final String email;
+  const OtpVerification({super.key, required this.email});
 
   @override
   State<OtpVerification> createState() => _OtpVerificationState();
@@ -12,7 +14,6 @@ class OtpVerification extends StatefulWidget {
 
 class _OtpVerificationState extends State<OtpVerification> {
   final TextEditingController _otpController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +56,10 @@ class _OtpVerificationState extends State<OtpVerification> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                onCompleted: (value) =>
+                    prossesAuth().verify(context, widget.email, value),
+                onSubmitted: (value) =>
+                    prossesAuth().verify(context, widget.email, value),
                 focusedPinTheme: PinTheme(
                   width: 50,
                   height: 60,
