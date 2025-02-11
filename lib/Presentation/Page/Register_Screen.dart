@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/auth.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,6 +11,10 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController name = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+  TextEditingController confirmPassword = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,12 +27,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Image.asset('assets/img/traver.png', height: 50),
             SizedBox(height: 40),
             TextField(
+              controller: name,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.yellow),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                labelText: 'Username',
+                labelText: 'name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -35,6 +41,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             SizedBox(height: 16),
             TextField(
+              controller: email,
+              decoration: InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.yellow),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                labelText: 'Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: password,
               obscureText: true,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
@@ -46,9 +67,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
+              
             ),
             SizedBox(height: 16),
             TextField(
+              controller: confirmPassword,
               obscureText: true,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
@@ -63,7 +86,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.goNamed(Routes.otp_verification),
+              onPressed: () => prossesAuth().register(
+                context,
+                name.text,
+                email.text,
+                password.text,
+                confirmPassword.text,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFCD240),
                 shape: RoundedRectangleBorder(

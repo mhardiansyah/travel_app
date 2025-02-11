@@ -31,9 +31,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  flutter_dotenv: ^5.2.1
   go_router: ^14.7.2
   google_fonts: ^6.2.1
+  http: ^1.3.0
   introduction_screen: ^3.1.14
+  pinput: ^5.0.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -53,6 +56,7 @@ flutter:
   assets:
     - assets/
     - assets/img/
+    - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
   # For details regarding adding assets from package dependencies, see

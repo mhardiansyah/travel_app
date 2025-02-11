@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
 
 class OtpVerification extends StatefulWidget {
@@ -11,7 +11,8 @@ class OtpVerification extends StatefulWidget {
 }
 
 class _OtpVerificationState extends State<OtpVerification> {
-  int? selectedIndex;
+  final TextEditingController _otpController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,36 +39,33 @@ class _OtpVerificationState extends State<OtpVerification> {
               'OTP Verification',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(
-              height: 80,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(4, (index) {
-                return SizedBox(
-                    width: 50,
-                    child: TextField(
-                      maxLength: 1,
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: selectedIndex == index
-                                  ? Colors.yellow
-                                  : Colors.grey),
-                        ),
-                        counterText: "",
-                        border: OutlineInputBorder(borderSide: BorderSide()),
-                      ),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = index;
-                        });
-                      },
-                    ));
-              }),
+            const SizedBox(height: 40),
+            Center(
+              child: Pinput(
+                controller: _otpController,
+                length: 6,
+                keyboardType: TextInputType.number,
+                defaultPinTheme: PinTheme(
+                  width: 50,
+                  height: 60,
+                  textStyle: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                focusedPinTheme: PinTheme(
+                  width: 50,
+                  height: 60,
+                  textStyle: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellow),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Row(
@@ -83,12 +81,12 @@ class _OtpVerificationState extends State<OtpVerification> {
             ElevatedButton(
               onPressed: () => context.goNamed(Routes.notif_success),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFCD240),
+                backgroundColor: const Color(0xFFFCD240),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: SizedBox(
+              child: const SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: Center(
