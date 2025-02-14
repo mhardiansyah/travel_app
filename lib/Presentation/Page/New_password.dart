@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/auth.dart';
 
 class NewPassword extends StatefulWidget {
-  const NewPassword({super.key});
+  final email;
+  const NewPassword({super.key, this.email});
 
   @override
   State<NewPassword> createState() => _NewPasswordState();
 }
 
 class _NewPasswordState extends State<NewPassword> {
+  TextEditingController password = TextEditingController();
+  TextEditingController confirmPassword = TextEditingController();
   bool _obscureText = true; // Untuk mengontrol visibilitas password
 
   void togglePasswordVisibility() {
@@ -46,6 +50,7 @@ class _NewPasswordState extends State<NewPassword> {
             ),
             SizedBox(height: 40),
             TextField(
+              controller: password,
               obscureText: _obscureText,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
@@ -67,6 +72,7 @@ class _NewPasswordState extends State<NewPassword> {
             ),
             SizedBox(height: 20),
             TextField(
+              controller: confirmPassword,
               obscureText: _obscureText,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
@@ -95,7 +101,8 @@ class _NewPasswordState extends State<NewPassword> {
             ),
             Spacer(),
             ElevatedButton(
-              onPressed: () => context.goNamed(Routes.otp_verification),
+              onPressed: () => prossesAuth().newPassword(
+                  context, widget.email, password.text, confirmPassword.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFCD240),
                 shape: RoundedRectangleBorder(

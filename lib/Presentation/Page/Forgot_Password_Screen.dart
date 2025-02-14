@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/auth.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  
+  const ForgotPasswordScreen({
+    super.key,
+  });
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  TextEditingController email = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +23,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          onPressed: () => context.goNamed(Routes.login),
         ),
       ),
       body: Padding(
@@ -38,6 +43,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             SizedBox(height: 40),
             TextField(
+              controller: email,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.yellow),
@@ -51,7 +57,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             SizedBox(height: 36),
             ElevatedButton(
-              onPressed: () => context.goNamed(Routes.new_password),
+              onPressed: () =>
+                  prossesAuth().forgotPassword(context, email.text,),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFCD240),
                 shape: RoundedRectangleBorder(

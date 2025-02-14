@@ -65,8 +65,10 @@ class prossesAuth {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({'email': email, 'otp': otp}));
+
     print("Response Status Code: ${response.statusCode}");
     print("Response Body: ${response.body}");
+    print("kode: ${otp}");
     if (response.statusCode == 200) {
       print("masuk ke if");
       return context.goNamed(Routes.notif_success);
@@ -75,6 +77,117 @@ class prossesAuth {
       return ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("kode otp nya salah"),
+        ),
+      );
+    }
+  }
+
+  Future login(BuildContext context, String email, String password) async {
+    Uri urlLogin = Uri.parse("$url/auth/login/");
+    var response = await http.post(urlLogin,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email, 'password': password}));
+
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+    if (response.statusCode == 200) {
+      print("masuk ke if");
+      var responseData = jsonDecode(response.body);
+      String token = responseData['token'];
+      print("Token: $token");
+      print("Login berhasil");
+      return context.goNamed(Routes.home);
+    } else {
+      print("gagal");
+      return ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Email atau password salah"),
+        ),
+      );
+    }
+  }
+
+  ///forgot password
+
+  Future forgotPassword(BuildContext context, String email) async {
+    Uri urlForgotPassword =
+        Uri.parse("http://172.10.50.65:4000/auth/forgotPassword");
+    var response = await http.post(urlForgotPassword,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email}));
+
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+    if (response.statusCode == 200) {
+      print("masuk ke if");
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Text("Email telah terkirim"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.goNamed(Routes.password_notif_success,);
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      print("gagal");
+      return ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Email tidak terdaftar atau tidak valid"),
+        ),
+      );
+    }
+  }
+
+  /// new password
+  Future newPassword(BuildContext context, String email, String password,
+      String confirmPassword) async {
+    Uri urlNewPassword =
+        Uri.parse("http://172.10.10.188:4000/auth/reset-password");
+    var response = await http.post(urlNewPassword,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'newPassword': password,
+          'newConfirmPassword': confirmPassword
+        }));
+
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+    if (response.statusCode == 200) {
+      print("masuk ke if");
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Text("Password berhasil diubah"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.goNamed(Routes.otp_verification, extra: email);
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      print("gagal");
+      return ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Password tidak sama"),
         ),
       );
     }

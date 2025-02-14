@@ -10,4 +10,5 @@ class Routes {
   static const String otp_verification = '/otp_verification';
   static const String new_password = '/new_password';
   static const String notif_success = '/notif_success';
+  static const String password_notif_success = '/password_notif_success';
 }

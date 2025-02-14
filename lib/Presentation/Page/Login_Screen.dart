@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +11,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
   bool? selectedIndex = false;
   bool _obscureText = true; // Untuk mengontrol visibilitas password
 
@@ -32,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Image.asset('assets/img/traver.png', height: 50),
             SizedBox(height: 40),
             TextField(
+              controller: email,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.yellow),
@@ -45,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 20),
             TextField(
+              controller: password,
               obscureText: _obscureText,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
@@ -108,7 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () =>
+                  prossesAuth().login(context, email.text, password.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFFCD240),
                 shape: RoundedRectangleBorder(
