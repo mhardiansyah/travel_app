@@ -42,7 +42,7 @@ class _PasswordNotifSuccessScreenState
                 ),
                 SizedBox(height: 40),
                 Text(
-                  'please login again to continue',
+                  'please cek your email and login again to continue',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ],

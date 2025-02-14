@@ -132,7 +132,9 @@ class prossesAuth {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                context.goNamed(Routes.password_notif_success,);
+                context.goNamed(
+                  Routes.password_notif_success,
+                );
               },
               child: Text("OK"),
             ),
