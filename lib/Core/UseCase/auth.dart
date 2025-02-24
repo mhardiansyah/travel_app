@@ -84,7 +84,7 @@ class prossesAuth {
   }
 
   Future login(BuildContext context, String email, String password) async {
-    Uri urlLogin = Uri.parse("http://172.10.50.31:4000/auth/login/");
+    Uri urlLogin = Uri.parse("http://172.10.10.24:4000/auth/login");
     var response = await http.post(urlLogin,
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +100,7 @@ class prossesAuth {
       // print("Token: $token");
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('Login', response.body);
+      print("Response Status Code: ${response.body}");
       print("Login berhasil");
       return context.goNamed(Routes.home);
     } else {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:travel_app/Core/UseCase/homecontroller.dart';
 import 'package:travel_app/Core/models/model.dart';
 import 'package:travel_app/Presentation/Widget/popular.dart';
 import 'package:travel_app/Presentation/Widget/wisata.dart';
@@ -14,19 +15,43 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Login? dataUser;
+  List<Categories> data = [];
 
   getData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       dataUser = loginFromJson(prefs.getString('Login')!);
     });
+    Homecontroller().getCategory().then(
+      (value) {
+        setState(() {
+          if (value != null) {
+            data = value;
+          }
+        });
+      },
+    );
   }
 
   @override
+  @override
   void initState() {
     getData();
+    // getCategories();
     super.initState();
   }
+
+  // Future getCategories() async {
+  //   final data = Homecontroller().getCategory().then(
+  //     (value) {
+  //       if (value != null) {
+  //         setState(() {
+  //           this.datacategory = value;
+  //         });
+  //       }
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       children: [
                         Text(
-                          "HI ${dataUser?.data.name} ",
+                          "HI ${dataUser?.data.name}",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -97,14 +122,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 10),
             Row(
-              children: [
-                categoryContainer("Beach", "assets/img/beach.png"),
-                SizedBox(width: 10),
-                categoryContainer("Mountain", "assets/img/mosque.png"),
-                SizedBox(width: 10),
-                categoryContainer("Forests", "assets/img/mountains.png"),
-              ],
-            ),
+                children: List.generate(
+              data.length,
+              (index) {
+                print("gagal loop${data[index]}");
+                return categoryContainer(data[index].name, data[index].image);
+              },
+            )),
             SizedBox(height: 20),
             Text(
               "Favorite Place",
@@ -191,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget categoryContainer(String title, String img) {
+  Widget categoryContainer(String title, String image) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -200,8 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          Image.asset(
-            img,
+          Image.network(
+            image,
           ),
           SizedBox(width: 5),
           Text(title),
