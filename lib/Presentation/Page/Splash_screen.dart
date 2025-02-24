@@ -1,7 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, override_on_non_overriding_member
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -12,15 +13,33 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool onboard = false;
+  String login = "";
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+  cekData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (prefs.getBool('isOnboard') != null) {
+        onboard = prefs.getBool('isOnboard')!;
+        if (prefs.getString("Login") != null) {
+          login = prefs.getString("Login")!;
+        }
+      }
+    });
+  }
 
+  void initState() {
+    print(onboard);
+    cekData();
     Future.delayed(
       Duration(seconds: 3),
-      () => context.goNamed(Routes.onboard),
+      () => !onboard
+          ? context.goNamed(Routes.onboard)
+          : login == ""
+              ? context.goNamed(Routes.login)
+              : context.goNamed(Routes.home),
     );
+    super.initState();
   }
 
   @override

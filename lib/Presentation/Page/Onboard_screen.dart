@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
 
 class OnboardScreen extends StatefulWidget {
@@ -44,8 +45,16 @@ class _OnboardScreenState extends State<OnboardScreen> {
       next: const Text("Next", style: TextStyle(color: Colors.white)),
       done: const Text("Done",
           style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
-      onDone: () => context.goNamed(Routes.login),
-      onSkip: () => context.goNamed(Routes.login),
+      onDone: () async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setBool('isOnboard', true);
+        context.goNamed(Routes.login);
+      },
+      onSkip: () async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setBool('isOnboard', true);
+        context.goNamed(Routes.login);
+      },
       dotsDecorator: DotsDecorator(
         size: const Size.square(10.0),
         activeSize: const Size(50.0, 10.0),

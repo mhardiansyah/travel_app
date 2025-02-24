@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:travel_app/Core/Rounting/App_route.dart';
 
 class prossesAuth {
@@ -83,7 +84,7 @@ class prossesAuth {
   }
 
   Future login(BuildContext context, String email, String password) async {
-    Uri urlLogin = Uri.parse("$url/auth/login/");
+    Uri urlLogin = Uri.parse("http://172.10.50.31:4000/auth/login/");
     var response = await http.post(urlLogin,
         headers: {
           'Content-Type': 'application/json',
@@ -94,9 +95,11 @@ class prossesAuth {
     print("Response Body: ${response.body}");
     if (response.statusCode == 200) {
       print("masuk ke if");
-      var responseData = jsonDecode(response.body);
-      String token = responseData['token'];
-      print("Token: $token");
+      // var responseData = jsonDecode(response.body);
+      // String token = responseData['token'];
+      // print("Token: $token");
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('Login', response.body);
       print("Login berhasil");
       return context.goNamed(Routes.home);
     } else {
@@ -113,7 +116,7 @@ class prossesAuth {
 
   Future forgotPassword(BuildContext context, String email) async {
     Uri urlForgotPassword =
-        Uri.parse("http://172.10.50.65:4000/auth/forgotPassword");
+        Uri.parse("http://172.10.50.90:4000/auth/forgotPassword");
     var response = await http.post(urlForgotPassword,
         headers: {
           'Content-Type': 'application/json',
