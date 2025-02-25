@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:travel_app/Core/models/model.dart';
 import 'package:travel_app/Presentation/Page/Forgot_Password_Screen.dart';
 import 'package:travel_app/Presentation/Page/Home.dart';
 import 'package:travel_app/Presentation/Page/Login_Screen.dart';
@@ -73,7 +74,10 @@ final appRoute = GoRouter(routes: [
   GoRoute(
     path: '/detail',
     name: Routes.detail,
-    builder: (context, state) => DetailScreen(),
+    builder: (context, state) {
+      final _data = state.extra as DetailWisata;
+      return DetailScreen(data: _data);
+    },
   ),
   GoRoute(
     path: '/search',

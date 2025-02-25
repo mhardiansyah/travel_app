@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 Widget Wisata(String img, String name, String place, String rating, tinggi,
-    lebar, context) {
+    lebar, context, bool bool, ) {
   return InkWell(
     onTap: () {},
     child: Stack(
       children: [
         Container(
           height: tinggi * 0.35,
-          width: lebar * 0.45,
+          width: lebar * 0.45 ,
           decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage(img), fit: BoxFit.cover),
+              image: DecorationImage(image: NetworkImage(img), fit: BoxFit.cover),
               borderRadius: BorderRadius.circular(20)),
         ),
         Container(

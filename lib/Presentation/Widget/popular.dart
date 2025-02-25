@@ -21,7 +21,8 @@ Widget Popular(String img, String name, String price, double rating,
           // ignore: prefer_const_constructors
           margin: EdgeInsets.only(right: 20),
           decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage(img), fit: BoxFit.cover),
+              image:
+                  DecorationImage(image: NetworkImage(img), fit: BoxFit.cover),
               borderRadius: BorderRadius.circular(20)),
         ),
         Container(
@@ -81,12 +82,19 @@ Widget Popular(String img, String name, String price, double rating,
               ),
               Container(
                 margin: EdgeInsets.only(bottom: 10),
-                child: Text(desc,
-                    style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey))),
+                child: Text(
+                  desc,
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  maxLines: 2, 
+                  overflow: TextOverflow
+                      .ellipsis, 
+                ),
               )
             ],
           ),

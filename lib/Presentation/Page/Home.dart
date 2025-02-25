@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:travel_app/Core/UseCase/homecontroller.dart';
+import 'package:travel_app/Core/Rounting/App_route.dart';
 import 'package:travel_app/Core/models/model.dart';
 import 'package:travel_app/Presentation/Widget/popular.dart';
 import 'package:travel_app/Presentation/Widget/wisata.dart';
+import 'package:travel_app/Core/UseCase/homecontroller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,43 +18,40 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Login? dataUser;
-  List<Categories> data = [];
+  List<Categories> dataCategory = [];
+  List<DetailWisata> favorit = [];
+  List<DetailWisata> populer = [];
 
   getData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       dataUser = loginFromJson(prefs.getString('Login')!);
     });
+
     Homecontroller().getCategory().then(
-      (value) {
-        setState(() {
+          (value) => setState(() {
+            if (value != null) {
+              dataCategory = value;
+            }
+          }),
+        );
+
+    Homecontroller().getWisata().then((value) => setState(() {
+          print(value);
           if (value != null) {
-            data = value;
+            favorit = value[0]["favorit"];
+            populer = value[0]["popular"];
           }
-        });
-      },
-    );
+        }));
   }
 
   @override
   @override
   void initState() {
     getData();
-    // getCategories();
+
     super.initState();
   }
-
-  // Future getCategories() async {
-  //   final data = Homecontroller().getCategory().then(
-  //     (value) {
-  //       if (value != null) {
-  //         setState(() {
-  //           this.datacategory = value;
-  //         });
-  //       }
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       children: [
                         Text(
-                          "HI ${dataUser?.data.name}",
+                          "HI ${dataUser?.data.name} ",
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -123,12 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 10),
             Row(
                 children: List.generate(
-              data.length,
-              (index) {
-                print("gagal loop${data[index]}");
-                return categoryContainer(data[index].name, data[index].image);
-              },
-            )),
+                    dataCategory.length,
+                    (index) => categoryContainer(
+                        dataCategory[index].name, dataCategory[index].image))),
             SizedBox(height: 20),
             Text(
               "Favorite Place",
@@ -139,20 +136,19 @@ class _HomeScreenState extends State<HomeScreen> {
               scrollDirection: Axis.horizontal,
               child: SizedBox(
                 child: Wrap(
-                  spacing: 10,
-                  children: [
-                    Wisata("assets/img/page1.jpg", "Tempat Wisata",
-                        "Jonggol, Indonesia", "4.8", tinggi, lebar, context),
-                    Wisata("assets/img/page1.jpg", "Tempat Wisata",
-                        "Jonggol, Indonesia", "4.8", tinggi, lebar, context),
-                    Wisata("assets/img/page1.jpg", "Tempat Wisata",
-                        "Jonggol, Indonesia", "4.8", tinggi, lebar, context),
-                    Wisata("assets/img/page1.jpg", "Tempat Wisata",
-                        "Jonggol, Indonesia", "4.8", tinggi, lebar, context),
-                    Wisata("assets/img/page1.jpg", "Tempat Wisata",
-                        "Jonggol, Indonesia", "4.8", tinggi, lebar, context),
-                  ],
-                ),
+                    spacing: 10,
+                    children: List.generate(
+                      favorit.length,
+                      (index) => Wisata(
+                          favorit[index].gambarwisata,
+                          favorit[index].namawisata,
+                          favorit[index].lokasiwisata,
+                          favorit[index].ratingWisata.toString(),
+                          tinggi,
+                          lebar,
+                          context,
+                          false),
+                    )),
               ),
             ),
             SizedBox(height: 20),
@@ -180,32 +176,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Wrap(
                   spacing: 10,
                   runSpacing: 10,
-                  children: [
-                    Popular(
-                        "assets/img/page1.jpg",
-                        "Tempat Wisata",
-                        "500000",
-                        4.8,
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit...",
-                        lebar,
-                        tinggi),
-                    Popular(
-                        "assets/img/page2.jpg",
-                        "Tempat Wisata",
-                        "300000",
-                        4.8,
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit...",
-                        lebar,
-                        tinggi),
-                    Popular(
-                        "assets/img/page3.jpg",
-                        "Tempat Wisata",
-                        "800000",
-                        4.8,
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit...",
-                        lebar,
-                        tinggi),
-                  ],
+                  children: List.generate(
+                    populer.length,
+                    (index) => InkWell(
+                        onTap: () => context.goNamed(Routes.detail,
+                            extra: populer[index]),
+                        child: Popular(
+                            populer[index].gambarwisata,
+                            populer[index].namawisata,
+                            populer[index].hargaWisata.toString(),
+                            populer[index].ratingWisata,
+                            populer[index].deskripsi.substring(0, 123),
+                            lebar,
+                            tinggi)),
+                  ),
                 ),
               ),
             )
@@ -215,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget categoryContainer(String title, String image) {
+  Widget categoryContainer(String title, String img) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -225,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Image.network(
-            image,
+            img,
           ),
           SizedBox(width: 5),
           Text(title),
@@ -233,4 +217,43 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+//   Widget categoryContainer(String title, String img) {
+//     return Container(
+//       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+//       decoration: BoxDecoration(
+//         color: Colors.grey[200],
+//         borderRadius: BorderRadius.circular(20),
+//       ),
+//       child: Row(
+//         children: [
+//           Image.network(
+//             img,
+//           ),
+//           SizedBox(width: 5),
+//           Text(title),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+// Widget categoryContainer(String title, String image) {
+//   return Container(
+//     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+//     decoration: BoxDecoration(
+//       color: Colors.grey[200],
+//       borderRadius: BorderRadius.circular(20),
+//     ),
+//     child: Row(
+//       children: [
+//         Image.network(
+//           image,
+//         ),
+//         SizedBox(width: 5),
+//         Text(title),
+//       ],
+//     ),
+//   );
+// }
 }
