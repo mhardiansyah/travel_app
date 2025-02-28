@@ -124,8 +124,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
                 children: List.generate(
                     dataCategory.length,
-                    (index) => categoryContainer(
-                        dataCategory[index].name, dataCategory[index].image))),
+                    (index) => InkWell(
+                          onTap: () => context.goNamed(Routes.search),
+                          child: categoryContainer(dataCategory[index].name,
+                              dataCategory[index].image),
+                        ))),
             SizedBox(height: 20),
             Text(
               "Favorite Place",

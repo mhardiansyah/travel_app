@@ -37,6 +37,7 @@ class _DetailScreenState extends State<DetailScreen> {
               icon: Icon(Icons.favorite),
               onPressed: () {
                 // Add filter action here
+                
               },
             ),
           ],
@@ -47,8 +48,15 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Wisata(widget.data.gambarwisata, widget.data.namawisata,
-                    widget.data.lokasiwisata, widget.data.ratingWisata.toString(), tinggi, lebar, context, true),
+                Wisata(
+                    widget.data.gambarwisata,
+                    widget.data.namawisata,
+                    widget.data.lokasiwisata,
+                    widget.data.ratingWisata.toString(),
+                    tinggi,
+                    lebar,
+                    context,
+                    true),
                 Container(
                     margin: EdgeInsets.only(top: 20),
                     child: Judul("What's Included?", "", tinggi)),
@@ -59,7 +67,8 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: Wrap(spacing: 20, children: [
                         Category("Flight", "assets/img/page1.jpg", lebar),
                         Category("Hotel", "assets/img/page1.jpg", lebar),
-                        Category("Transportation", "assets/img/page1.jpg", lebar),
+                        Category(
+                            "Transportation", "assets/img/page1.jpg", lebar),
                         Category("Eat", "assets/img/page1.jpg", lebar),
                       ]),
                     )),
