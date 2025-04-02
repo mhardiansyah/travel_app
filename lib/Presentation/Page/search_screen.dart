@@ -63,9 +63,10 @@ class _SearchScreenState extends State<SearchScreen> {
       }
 
       // Filter berdasarkan rating
-      if (selectedRating > 0) {
+      if (selectedRating > 0 && selectedRating <= 5) {
         filtered = filtered
-            .where((item) => item.ratingWisata >= selectedRating.toDouble())
+            .where((item) =>
+                item.ratingWisata.toInt() == selectedRating.toDouble())
             .toList();
         print("Filtered Data:");
         filtered.forEach((item) => print("Item Rating: ${item.ratingWisata}"));
