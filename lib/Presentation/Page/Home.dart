@@ -17,10 +17,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  TextEditingController searchQueryController = TextEditingController();
   Login? dataUser;
+  String? searchQuery;
   List<Categories> dataCategory = [];
   List<DetailWisata> favorit = [];
   List<DetailWisata> populer = [];
+  List<DetailWisata> productlagu = [];
+  List<DetailWisata> displaymodels = [];
 
   getData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -104,17 +108,24 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 10),
             TextField(
-              decoration: InputDecoration(
-                hintText: "Search destination",
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+                controller: searchQueryController,
+                decoration: InputDecoration(
+                  hintText: "Search destination",
+                  prefixIcon: Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
-              ),
-            ),
+                onSubmitted: (value) {
+                  if (value.isNotEmpty) {
+                    context
+                        .goNamed(Routes.search, extra: {'searchQuery': value});
+                  }
+                  // context.goNamed(Routes.search, extra: value),
+                }),
             SizedBox(height: 20),
             Text(
               "Choose Category",
@@ -125,7 +136,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: List.generate(
                     dataCategory.length,
                     (index) => InkWell(
-                          onTap: () => context.goNamed(Routes.search),
+                          onTap: () {
+                            context.goNamed(Routes.search,
+                                extra: {'categoryID': dataCategory[index].id});
+                          },
                           child: categoryContainer(dataCategory[index].name,
                               dataCategory[index].image),
                         ))),

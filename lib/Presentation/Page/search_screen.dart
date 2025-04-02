@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:travel_app/Core/Rounting/App_route.dart';
+import 'package:travel_app/Core/UseCase/homecontroller.dart';
+import 'package:travel_app/Core/models/model.dart';
+import 'package:travel_app/Presentation/Widget/judul.dart';
+import 'package:travel_app/Presentation/Widget/kategori.dart';
 import 'package:travel_app/Presentation/Widget/popular.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  final int categoryID;
+  final String? searchQuery;
+  const SearchScreen({
+    super.key,
+    required this.categoryID,
+    this.searchQuery,
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -10,43 +25,72 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
-  List<Map<String, dynamic>> destinations = [
-    {
-      "image": "assets/img/page1.jpg",
-      "title": "Pantai Kuta",
-      "price": "500000",
-      "rating": 4.8
-    },
-    {
-      "image": "assets/img/page2.jpg",
-      "title": "Ubud Forest",
-      "price": "300000",
-      "rating": 4.7
-    },
-    {
-      "image": "assets/img/page3.jpg",
-      "title": "Tanah Lot",
-      "price": "800000",
-      "rating": 4.9
-    },
-  ];
+  Login? dataUser;
+  List<Categories> category = [];
+  List<DetailWisata> filtered = [];
+  int selectedRating = 0;
+  RangeValues selectedPriceRange = RangeValues(100, 1000000);
 
-  List<Map<String, dynamic>> filteredDestinations = [];
+  void filteredData(
+      {String? searchQuery, int? rating, RangeValues? priceRange}) async {
+    final controller = Homecontroller();
+    var rawData = await controller.getWisata();
+
+    List<DetailWisata> data;
+    if (rawData is List<Map<String, List<DetailWisata>>>) {
+      data =
+          rawData.expand((map) => map.values.expand((list) => list)).toList();
+    } else if (rawData is List<DetailWisata>) {
+      data = rawData;
+    } else {
+      print("Error: Unexpected data format");
+      return;
+    }
+
+    setState(() {
+      String query = searchQuery ?? widget.searchQuery ?? "";
+
+      if (query.isNotEmpty) {
+        filtered = data
+            .where((item) =>
+                item.namawisata.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      } else if (widget.categoryID != 0) {
+        filtered =
+            data.where((item) => item.idCategory == widget.categoryID).toList();
+      } else {
+        filtered = data;
+      }
+
+      // Filter berdasarkan rating
+      if (selectedRating > 0) {
+        filtered = filtered
+            .where((item) => item.ratingWisata >= selectedRating.toDouble())
+            .toList();
+        print("Filtered Data:");
+        filtered.forEach((item) => print("Item Rating: ${item.ratingWisata}"));
+      }
+
+      // Filter berdasarkan harga
+      if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
+        filtered = filtered
+            .where((item) =>
+                item.hargaWisata >= selectedPriceRange.start &&
+                item.hargaWisata <= selectedPriceRange.end)
+            .toList();
+      }
+
+      // Cek jika tidak ada hasil
+      if (filtered.isEmpty) {
+        print("Hasil tidak ditemukan.");
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    filteredDestinations = destinations;
-  }
-
-  void filterSearch(String query) {
-    List<Map<String, dynamic>> temp = destinations
-        .where((destination) =>
-            destination['title'].toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    setState(() {
-      filteredDestinations = temp;
-    });
+    filteredData();
   }
 
   void showFilterSheet() {
@@ -55,84 +99,78 @@ class _SearchScreenState extends State<SearchScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      isScrollControlled: true, // Menyesuaikan tinggi modal dengan konten
+      isScrollControlled: true,
       builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.6, // Awal modal 60% tinggi layar
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
+        int tempRating = selectedRating;
+        RangeValues tempPriceRange = selectedPriceRange;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
             return Padding(
               padding: const EdgeInsets.all(20),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Range Price"),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Colors.black,
-                        inactiveTrackColor: Colors.grey[300],
-                        thumbColor: Colors.black,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Range Price"),
+                  RangeSlider(
+                    values: tempPriceRange,
+                    min: 100,
+                    max: 1000000,
+                    divisions: 50,
+                    labels: RangeLabels(
+                      tempPriceRange.start.toStringAsFixed(0),
+                      tempPriceRange.end.toStringAsFixed(0),
+                    ),
+                    onChanged: (values) {
+                      setModalState(() => tempPriceRange = values);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text("Star Review"),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          Icons.star,
+                          color:
+                              index < tempRating ? Colors.amber : Colors.grey,
+                        ),
+                        onPressed: () {
+                          setModalState(() => tempRating = index + 1);
+                        },
+                      );
+                    }),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            selectedRating = 0;
+                            selectedPriceRange = RangeValues(100, 1000000);
+                            filteredData(); // Reset filter
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: Text("Clear All"),
                       ),
-                      child: RangeSlider(
-                        values: RangeValues(100, 590),
-                        min: 100,
-                        max: 7000,
-                        onChanged: (RangeValues values) {},
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            selectedRating = tempRating;
+                            selectedPriceRange = tempPriceRange;
+                            filteredData(); // Terapkan filter
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: Text("Apply"),
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    Text("Star Review"),
-                    Column(
-                      children: List.generate(5, (index) {
-                        return ListTile(
-                          leading: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(5, (i) {
-                              return Icon(
-                                Icons.star,
-                                color: i <= index ? Colors.amber : Colors.grey,
-                              );
-                            }),
-                          ),
-                          trailing: index == 0
-                              ? Icon(Icons.check_circle, color: Colors.green)
-                              : null,
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 16),
-                    Text("Included"),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        FilterChip(
-                            label: Text("All"),
-                            selected: true,
-                            onSelected: (bool value) {}),
-                        FilterChip(
-                            label: Text("Flight"),
-                            selected: false,
-                            onSelected: (bool value) {}),
-                        FilterChip(
-                            label: Text("Hotel"),
-                            selected: false,
-                            onSelected: (bool value) {}),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(onPressed: () {}, child: Text("Clear All")),
-                        ElevatedButton(onPressed: () {}, child: Text("Apply")),
-                      ],
-                    )
-                  ],
-                ),
+                    ],
+                  )
+                ],
               ),
             );
           },
@@ -143,67 +181,217 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double tinggi = MediaQuery.of(context).size.height;
-    double lebar = MediaQuery.of(context).size.width;
-
+    var tinggi = MediaQuery.of(context).size.height;
+    var lebar = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Search', style: TextStyle(color: Colors.black)),
-        centerTitle: true,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune, color: Colors.black),
-            onPressed: showFilterSheet,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              context.goNamed(Routes.home);
+            },
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: searchController,
-                onChanged: filterSearch,
-                decoration: InputDecoration(
-                  hintText: "Search destination",
-                  prefixIcon: Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+          title: Text('Search'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.filter_list_alt),
+              onPressed: () {
+                showFilterSheet();
+              },
+            ),
+          ],
+        ),
+        body: Container(
+            padding: EdgeInsets.all(20),
+            child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  //start search
+                  Container(
+                    margin: EdgeInsets.only(bottom: tinggi * 0.03),
+                    child: TextField(
+                      decoration: InputDecoration(
+                          hintText: "Search destination",
+                          suffixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15))),
+                          hintStyle: GoogleFonts.poppins(fontSize: 20)),
+                      onChanged: (value) => filteredData(searchQuery: value),
+                    ),
+                  ),
+                  Judul("data dari ctegory yg di pilih ", "", tinggi),
+                  Container(
+                      margin: EdgeInsets.only(bottom: tinggi * 0.03),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Wrap(spacing: 20, children: [
+                          Category("Beach", "assets/img/beach.png", lebar),
+                          Category(
+                              "Mountain", "assets/img/mountains.png", lebar),
+                          Category("Religion", "assets/img/mosque.png", lebar),
+                        ]),
+                      )),
+                  Container(
+                    margin: EdgeInsets.only(bottom: tinggi * 0.03),
+                    child: Wrap(
+                        runSpacing: 30,
+                        children: List.generate(
+                          filtered.length,
+                          (index) => Popular(
+                              filtered[index].gambarwisata,
+                              filtered[index].namawisata,
+                              filtered[index].hargaWisata.toString(),
+                              filtered[index].ratingWisata,
+                              filtered[index].deskripsi,
+                              lebar,
+                              tinggi),
+                        )),
+                  )
+
+//end popular
+                ]))));
+  }
+}
+
+class FilterOptions extends StatefulWidget {
+  @override
+  _FilterOptionsState createState() => _FilterOptionsState();
+}
+
+class _FilterOptionsState extends State<FilterOptions> {
+  RangeValues _currentRangeValues = RangeValues(1000, 5000);
+  bool _includeFlight = false;
+  bool _includeHotel = false;
+  bool _includeTransportation = false;
+  bool _includeEat = false;
+  int _selectedStar = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      padding: EdgeInsets.all(20),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Filter Options',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20),
+            Text('Price Range'),
+            RangeSlider(
+              values: _currentRangeValues,
+              min: 0,
+              max: 5000000,
+              divisions: 100,
+              labels: RangeLabels(
+                _currentRangeValues.start.round().toString(),
+                _currentRangeValues.end.round().toString(),
+              ),
+              onChanged: (values) {
+                setState(() {
+                  _currentRangeValues = values;
+                });
+              },
+            ),
+            SizedBox(height: 20),
+            Text('Star Review'),
+            Row(
+              children: List.generate(5, (index) {
+                return IconButton(
+                  icon: Icon(
+                    index < _selectedStar ? Icons.star : Icons.star_border,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _selectedStar = index + 1;
+                    });
+                  },
+                );
+              }),
+            ),
+            SizedBox(height: 20),
+            Text('Include'),
+            CheckboxListTile(
+              title: Text('Flight'),
+              value: _includeFlight,
+              onChanged: (value) {
+                setState(() {
+                  _includeFlight = value!;
+                });
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Hotel'),
+              value: _includeHotel,
+              onChanged: (value) {
+                setState(() {
+                  _includeHotel = value!;
+                });
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Transportation'),
+              value: _includeTransportation,
+              onChanged: (value) {
+                setState(() {
+                  _includeTransportation = value!;
+                });
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Eat'),
+              value: _includeEat,
+              onChanged: (value) {
+                setState(() {
+                  _includeEat = value!;
+                });
+              },
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.17,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Clear all filters
+                      setState(() {
+                        _currentRangeValues = RangeValues(1000, 5000);
+                        _includeFlight = false;
+                        _includeHotel = false;
+                        _includeTransportation = false;
+                        _includeEat = false;
+                        _selectedStar = 0;
+                      });
+                    },
+                    child: Text('Clear All'),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.grey),
                   ),
                 ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'We found ${filteredDestinations.length} trips',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              Column(
-                children: filteredDestinations.map((destination) {
-                  return Popular(
-                    destination["image"],
-                    destination["title"],
-                    destination["price"],
-                    destination["rating"],
-                    "Lorem ipsum dolor sit amet...",
-                    lebar,
-                    tinggi,
-                  );
-                }).toList(),
-              )
-            ],
-          ),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.17,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Apply filters
+                      Navigator.pop(
+                        context,
+                      );
+                    },
+                    child: Text('Apply'),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.yellow),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

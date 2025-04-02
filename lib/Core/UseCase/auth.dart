@@ -84,7 +84,7 @@ class prossesAuth {
   }
 
   Future login(BuildContext context, String email, String password) async {
-    Uri urlLogin = Uri.parse("http://172.10.50.49:4000/auth/login");
+    Uri urlLogin = Uri.parse("http://192.168.1.100:4000/auth/login");
     var response = await http.post(urlLogin,
         headers: {
           'Content-Type': 'application/json',

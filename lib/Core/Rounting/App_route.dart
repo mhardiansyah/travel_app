@@ -82,6 +82,11 @@ final appRoute = GoRouter(routes: [
   GoRoute(
     path: '/search',
     name: Routes.search,
-    builder: (context, state) => SearchScreen(),
+    builder: (context, state) {
+      final extra = state.extra as Map<String, dynamic>? ?? {};
+      final String searchQuery = extra['searchQuery'] as String? ?? "";
+      final int categoryID = extra['categoryID'] as int? ?? 0;
+      return SearchScreen(categoryID: categoryID, searchQuery: searchQuery);
+    },
   ),
 ]);
