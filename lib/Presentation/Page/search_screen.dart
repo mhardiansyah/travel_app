@@ -236,19 +236,29 @@ class _SearchScreenState extends State<SearchScreen> {
                       )),
                   Container(
                     margin: EdgeInsets.only(bottom: tinggi * 0.03),
-                    child: Wrap(
-                        runSpacing: 30,
-                        children: List.generate(
-                          filtered.length,
-                          (index) => Popular(
-                              filtered[index].gambarwisata,
-                              filtered[index].namawisata,
-                              filtered[index].hargaWisata.toString(),
-                              filtered[index].ratingWisata,
-                              filtered[index].deskripsi,
-                              lebar,
-                              tinggi),
-                        )),
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              "Data not found",
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : Wrap(
+                            runSpacing: 30,
+                            children: List.generate(
+                              filtered.length,
+                              (index) => Popular(
+                                  filtered[index].gambarwisata,
+                                  filtered[index].namawisata,
+                                  filtered[index].hargaWisata.toString(),
+                                  filtered[index].ratingWisata,
+                                  filtered[index].deskripsi,
+                                  lebar,
+                                  tinggi),
+                            )),
                   )
 
 //end popular
