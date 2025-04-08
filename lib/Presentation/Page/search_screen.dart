@@ -32,6 +32,9 @@ class _SearchScreenState extends State<SearchScreen> {
   RangeValues selectedPriceRange = RangeValues(100, 1000000);
   List<DetailWisata> allData = [];
 
+
+//soal no 3
+// Filter data berdasarkan rating dan harga
   void popupFiltered(List<DetailWisata> allData) {
     List<DetailWisata> rslt = List.from(allData);
 
@@ -124,6 +127,8 @@ class _SearchScreenState extends State<SearchScreen> {
   //   });
   // }
 
+//soal no 1 dan 2
+  // Filter data berdasarkan kategori dan query pencarian
   void filteredData({String? searchQuery}) async {
     final controller = Homecontroller();
     var rawData = await controller.getWisata();
