@@ -23,8 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Categories> dataCategory = [];
   List<DetailWisata> favorit = [];
   List<DetailWisata> populer = [];
-  List<DetailWisata> productlagu = [];
-  List<DetailWisata> displaymodels = [];
 
   getData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -48,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         }));
   }
+  
 
   @override
   @override
@@ -61,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     double tinggi = MediaQuery.of(context).size.height;
     double lebar = MediaQuery.of(context).size.width;
-
+     
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -156,7 +155,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     spacing: 10,
                     children: List.generate(
                       favorit.length,
+                      
                       (index) => Wisata(
+                        
                           favorit[index].gambarwisata,
                           favorit[index].namawisata,
                           favorit[index].lokasiwisata,
@@ -168,7 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     )),
               ),
             ),
+            
             SizedBox(height: 20),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -215,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  
 
   Widget categoryContainer(String title, String img) {
     return Container(

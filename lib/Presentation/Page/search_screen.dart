@@ -30,9 +30,101 @@ class _SearchScreenState extends State<SearchScreen> {
   List<DetailWisata> filtered = [];
   int selectedRating = 0;
   RangeValues selectedPriceRange = RangeValues(100, 1000000);
+  List<DetailWisata> allData = [];
 
-  void filteredData(
-      {String? searchQuery, int? rating, RangeValues? priceRange}) async {
+  void popupFiltered(List<DetailWisata> allData) {
+    List<DetailWisata> temp = List.from(allData);
+
+    // Filter rating
+    if (selectedRating > 0 && selectedRating <= 5) {
+      temp = temp
+          .where((item) => item.ratingWisata.toInt() == selectedRating)
+          .toList();
+      print("Filtered by rating: $selectedRating");
+    } else {
+      print("No rating filter applied.");
+    }
+
+    // Filter harga
+    if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
+      temp = temp
+          .where((item) =>
+              item.hargaWisata >= selectedPriceRange.start &&
+              item.hargaWisata <= selectedPriceRange.end)
+          .toList();
+      print(
+          "Filtered by price range: ${selectedPriceRange.start} - ${selectedPriceRange.end}");
+    } else {
+      print("No price range filter applied.");
+    }
+
+    setState(() {
+      filtered = temp;
+    });
+
+    if (filtered.isEmpty) {
+      print("Hasil tidak ditemukan.");
+    }
+  }
+
+  // void filteredData(
+  //     {String? searchQuery, int? rating, RangeValues? priceRange}) async {
+  //   final controller = Homecontroller();
+  //   var rawData = await controller.getWisata();
+
+  //   List<DetailWisata> data;
+  //   if (rawData is List<Map<String, List<DetailWisata>>>) {
+  //     data =
+  //         rawData.expand((map) => map.values.expand((list) => list)).toList();
+  //   } else if (rawData is List<DetailWisata>) {
+  //     data = rawData;
+  //   } else {
+  //     print("Error: Unexpected data format");
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     String query = searchQuery ?? widget.searchQuery ?? "";
+
+  //     if (query.isNotEmpty) {
+  //       filtered = data
+  //           .where((item) =>
+  //               item.namawisata.toLowerCase().contains(query.toLowerCase()))
+  //           .toList();
+  //     } else if (widget.categoryID != 0) {
+  //       filtered =
+  //           data.where((item) => item.idCategory == widget.categoryID).toList();
+  //     } else {
+  //       filtered = data;
+  //     }
+
+  //     // Filter berdasarkan rating
+  //     if (selectedRating > 0 && selectedRating <= 5) {
+  //       filtered = filtered
+  //           .where((item) =>
+  //               item.ratingWisata.toInt() == selectedRating.toDouble())
+  //           .toList();
+  //       print("Filtered Data:");
+  //       filtered.forEach((item) => print("Item Rating: ${item.ratingWisata}"));
+  //     }
+
+  //     // Filter berdasarkan harga
+  //     if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
+  //       filtered = filtered
+  //           .where((item) =>
+  //               item.hargaWisata >= selectedPriceRange.start &&
+  //               item.hargaWisata <= selectedPriceRange.end)
+  //           .toList();
+  //     }
+
+  //     // Cek jika tidak ada hasil
+  //     if (filtered.isEmpty) {
+  //       print("Hasil tidak ditemukan.");
+  //     }
+  //   });
+  // }
+
+  void filteredData({String? searchQuery}) async {
     final controller = Homecontroller();
     var rawData = await controller.getWisata();
 
@@ -47,45 +139,24 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    setState(() {
-      String query = searchQuery ?? widget.searchQuery ?? "";
+    List<DetailWisata> temp;
 
-      if (query.isNotEmpty) {
-        filtered = data
-            .where((item) =>
-                item.namawisata.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      } else if (widget.categoryID != 0) {
-        filtered =
-            data.where((item) => item.idCategory == widget.categoryID).toList();
-      } else {
-        filtered = data;
-      }
+    String query = searchQuery ?? widget.searchQuery ?? "";
 
-      // Filter berdasarkan rating
-      if (selectedRating > 0 && selectedRating <= 5) {
-        filtered = filtered
-            .where((item) =>
-                item.ratingWisata.toInt() == selectedRating.toDouble())
-            .toList();
-        print("Filtered Data:");
-        filtered.forEach((item) => print("Item Rating: ${item.ratingWisata}"));
-      }
+    if (query.isNotEmpty) {
+      temp = data
+          .where((item) =>
+              item.namawisata.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    } else if (widget.categoryID != 0) {
+      temp =
+          data.where((item) => item.idCategory == widget.categoryID).toList();
+    } else {
+      temp = data;
+    }
 
-      // Filter berdasarkan harga
-      if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
-        filtered = filtered
-            .where((item) =>
-                item.hargaWisata >= selectedPriceRange.start &&
-                item.hargaWisata <= selectedPriceRange.end)
-            .toList();
-      }
-
-      // Cek jika tidak ada hasil
-      if (filtered.isEmpty) {
-        print("Hasil tidak ditemukan.");
-      }
-    });
+    // Panggil filter tambahan (rating & harga)
+    popupFiltered(temp);
   }
 
   @override
@@ -159,12 +230,30 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Text("Clear All"),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          final controller = Homecontroller();
+                          var rawData = await controller.getWisata();
+
+                          List<DetailWisata> data;
+                          if (rawData
+                              is List<Map<String, List<DetailWisata>>>) {
+                            data = rawData
+                                .expand(
+                                    (map) => map.values.expand((list) => list))
+                                .toList();
+                          } else if (rawData is List<DetailWisata>) {
+                            data = rawData;
+                          } else {
+                            print("Error: Unexpected data format");
+                            return;
+                          }
+
                           setState(() {
                             selectedRating = tempRating;
                             selectedPriceRange = tempPriceRange;
-                            filteredData(); // Terapkan filter
                           });
+
+                          popupFiltered(data);
                           Navigator.pop(context);
                         },
                         child: Text("Apply"),
