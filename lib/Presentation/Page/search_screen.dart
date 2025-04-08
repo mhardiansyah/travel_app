@@ -33,11 +33,11 @@ class _SearchScreenState extends State<SearchScreen> {
   List<DetailWisata> allData = [];
 
   void popupFiltered(List<DetailWisata> allData) {
-    List<DetailWisata> temp = List.from(allData);
+    List<DetailWisata> rslt = List.from(allData);
 
     // Filter rating
     if (selectedRating > 0 && selectedRating <= 5) {
-      temp = temp
+      rslt = rslt
           .where((item) => item.ratingWisata.toInt() == selectedRating)
           .toList();
       print("Filtered by rating: $selectedRating");
@@ -47,7 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Filter harga
     if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
-      temp = temp
+      rslt = rslt
           .where((item) =>
               item.hargaWisata >= selectedPriceRange.start &&
               item.hargaWisata <= selectedPriceRange.end)
@@ -59,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     setState(() {
-      filtered = temp;
+      filtered = rslt;
     });
 
     if (filtered.isEmpty) {
@@ -139,24 +139,23 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    List<DetailWisata> temp;
+    List<DetailWisata> isi;
 
     String query = searchQuery ?? widget.searchQuery ?? "";
 
     if (query.isNotEmpty) {
-      temp = data
+      isi = data
           .where((item) =>
               item.namawisata.toLowerCase().contains(query.toLowerCase()))
           .toList();
     } else if (widget.categoryID != 0) {
-      temp =
+      isi =
           data.where((item) => item.idCategory == widget.categoryID).toList();
     } else {
-      temp = data;
+      isi = data;
     }
 
-    // Panggil filter nya
-    popupFiltered(temp);
+    popupFiltered(isi);
   }
 
   @override
