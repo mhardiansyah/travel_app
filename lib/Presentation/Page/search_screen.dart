@@ -155,7 +155,7 @@ class _SearchScreenState extends State<SearchScreen> {
       temp = data;
     }
 
-    // Panggil filter tambahan (rating & harga)
+    // Panggil filter nya
     popupFiltered(temp);
   }
 
