@@ -12,7 +12,7 @@ class prossesAuth {
 
   Future register(BuildContext context, String name, String email,
       String password, String confirmPassword) async {
-    Uri urlRegister = Uri.parse("$url/auth/register/");
+    Uri urlRegister = Uri.parse("http://172.10.10.214:4000/register/");
     //validasi before debuging
     print("Nama: $name");
     print("Email: $email");
@@ -84,7 +84,7 @@ class prossesAuth {
   }
 
   Future login(BuildContext context, String email, String password) async {
-    Uri urlLogin = Uri.parse("http://192.168.9.19:4000/auth/login");
+    Uri urlLogin = Uri.parse("http://172.10.10.214:4000/auth/login");
     var response = await http.post(urlLogin,
         headers: {
           'Content-Type': 'application/json',

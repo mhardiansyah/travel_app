@@ -26,12 +26,14 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
   Login? dataUser;
+  List<Categories> dataCategory = [];
+  int selectedCategoryID = 0;
   List<Categories> category = [];
+
   List<DetailWisata> filtered = [];
   int selectedRating = 0;
   RangeValues selectedPriceRange = RangeValues(100, 1000000);
   List<DetailWisata> allData = [];
-
 
 //soal no 3
 // Filter data berdasarkan rating dan harga
@@ -70,63 +72,6 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  // void filteredData(
-  //     {String? searchQuery, int? rating, RangeValues? priceRange}) async {
-  //   final controller = Homecontroller();
-  //   var rawData = await controller.getWisata();
-
-  //   List<DetailWisata> data;
-  //   if (rawData is List<Map<String, List<DetailWisata>>>) {
-  //     data =
-  //         rawData.expand((map) => map.values.expand((list) => list)).toList();
-  //   } else if (rawData is List<DetailWisata>) {
-  //     data = rawData;
-  //   } else {
-  //     print("Error: Unexpected data format");
-  //     return;
-  //   }
-
-  //   setState(() {
-  //     String query = searchQuery ?? widget.searchQuery ?? "";
-
-  //     if (query.isNotEmpty) {
-  //       filtered = data
-  //           .where((item) =>
-  //               item.namawisata.toLowerCase().contains(query.toLowerCase()))
-  //           .toList();
-  //     } else if (widget.categoryID != 0) {
-  //       filtered =
-  //           data.where((item) => item.idCategory == widget.categoryID).toList();
-  //     } else {
-  //       filtered = data;
-  //     }
-
-  //     // Filter berdasarkan rating
-  //     if (selectedRating > 0 && selectedRating <= 5) {
-  //       filtered = filtered
-  //           .where((item) =>
-  //               item.ratingWisata.toInt() == selectedRating.toDouble())
-  //           .toList();
-  //       print("Filtered Data:");
-  //       filtered.forEach((item) => print("Item Rating: ${item.ratingWisata}"));
-  //     }
-
-  //     // Filter berdasarkan harga
-  //     if (selectedPriceRange.start > 100 || selectedPriceRange.end < 1000000) {
-  //       filtered = filtered
-  //           .where((item) =>
-  //               item.hargaWisata >= selectedPriceRange.start &&
-  //               item.hargaWisata <= selectedPriceRange.end)
-  //           .toList();
-  //     }
-
-  //     // Cek jika tidak ada hasil
-  //     if (filtered.isEmpty) {
-  //       print("Hasil tidak ditemukan.");
-  //     }
-  //   });
-  // }
-
 //soal no 1 dan 2
   // Filter data berdasarkan kategori dan query pencarian
   void filteredData({String? searchQuery}) async {
@@ -154,8 +99,10 @@ class _SearchScreenState extends State<SearchScreen> {
               item.namawisata.toLowerCase().contains(query.toLowerCase()))
           .toList();
     } else if (widget.categoryID != 0) {
+      isi = data.where((item) => item.idCategory == widget.categoryID).toList();
+    } else if (selectedCategoryID != 0) {
       isi =
-          data.where((item) => item.idCategory == widget.categoryID).toList();
+          data.where((item) => item.idCategory == selectedCategoryID).toList();
     } else {
       isi = data;
     }
@@ -163,9 +110,18 @@ class _SearchScreenState extends State<SearchScreen> {
     popupFiltered(isi);
   }
 
+  void getCategories() async {
+    final controller = Homecontroller();
+    var categories = await controller.getCategory();
+    setState(() {
+      dataCategory = categories;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    getCategories();
     filteredData();
   }
 
@@ -317,17 +273,21 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   Judul("data dari ctegory yg di pilih ", "", tinggi),
-                  Container(
-                      margin: EdgeInsets.only(bottom: tinggi * 0.03),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Wrap(spacing: 20, children: [
-                          Category("Beach", "assets/img/beach.png", lebar),
-                          Category(
-                              "Mountain", "assets/img/mountains.png", lebar),
-                          Category("Religion", "assets/img/mosque.png", lebar),
-                        ]),
-                      )),
+                  Row(
+                      children: List.generate(
+                          dataCategory.length,
+                          (index) => InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    selectedCategoryID = dataCategory[index].id;
+                                    filteredData();
+                                  });
+                                },
+                                child: categoryContainer(
+                                    dataCategory[index].name,
+                                    dataCategory[index].image),
+                              ))),
+                  SizedBox(height: 20),
                   Container(
                     margin: EdgeInsets.only(bottom: tinggi * 0.03),
                     child: filtered.isEmpty
@@ -358,6 +318,25 @@ class _SearchScreenState extends State<SearchScreen> {
 //end popular
                 ]))));
   }
+}
+
+Widget categoryContainer(String title, String img) {
+  return Container(
+    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+    decoration: BoxDecoration(
+      color: Colors.grey[200],
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Row(
+      children: [
+        Image.network(
+          img,
+        ),
+        SizedBox(width: 5),
+        Text(title),
+      ],
+    ),
+  );
 }
 
 class FilterOptions extends StatefulWidget {

@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 class Homecontroller {
   Future getCategory() async {
     var url = dotenv.env['base_url'];
-    Uri urlCategories = Uri.parse("http://192.168.9.19:4000/categories");
+    Uri urlCategories = Uri.parse("http://172.10.10.214:4000/categories");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     Login user = loginFromJson(prefs.getString("Login")!);
     print("User: ${user.token}");
@@ -33,7 +33,7 @@ class Homecontroller {
   }
 
   Future getWisata() async {
-    Uri urlWisata = Uri.parse("http://192.168.9.19:4000/wisata");
+    Uri urlWisata = Uri.parse("http://172.10.10.214:4000/wisata");
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     Login user = loginFromJson(prefs.getString("Login")!);
     print("User: ${user.token}");
